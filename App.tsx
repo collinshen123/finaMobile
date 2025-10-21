@@ -1,32 +1,51 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  Platform,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
-// Fina Money web application URL
 const WEB_APP_URL = 'https://www.fina.money/';
 
 function App() {
   const webViewRef = useRef<WebView>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [canGoBack, setCanGoBack] = useState(false);
+
+  // 🔹 Configure Google Sign-In
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId:
+        '246133755149-akn6tqdaugdqm30maute6bipmtkmd9ll.apps.googleusercontent.com',
+      iosClientId:
+        '246133755149-5rn6pctharrvip4m5olf3igrriujlq5t.apps.googleusercontent.com',
+    });
+  }, []);
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const result = await GoogleSignin.signIn();
+      console.log('User info:', result);
+
+      // Send token to WebView if needed
+      webViewRef.current?.injectJavaScript(`
+        window.postMessage(${JSON.stringify(result)}, '*');
+      `);
+    } catch (error: any) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        console.log('User cancelled sign in');
+      } else {
+        console.error(error);
+      }
+    }
+  };
 
   const handleReload = () => {
     setError(null);
@@ -34,71 +53,72 @@ function App() {
     webViewRef.current?.reload();
   };
 
-  const handleGoBack = () => {
-    if (canGoBack && webViewRef.current) {
-      webViewRef.current.goBack();
-    }
-  };
-
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-      <View style={styles.container}>
-        {error ? (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorTitle}>Connection Error</Text>
-            <Text style={styles.errorMessage}>{error}</Text>
-            <TouchableOpacity style={styles.retryButton} onPress={handleReload}>
-              <Text style={styles.retryButtonText}>Retry</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <>
-            <WebView
-              ref={webViewRef}
-              source={{ uri: WEB_APP_URL }}
-              style={styles.webview}
-              onLoadStart={() => setLoading(true)}
-              onLoadEnd={() => setLoading(false)}
-              onNavigationStateChange={(navState) => setCanGoBack(navState.canGoBack)}
-              javaScriptEnabled
-              domStorageEnabled
-              allowFileAccess
-              mixedContentMode="compatibility"
-              thirdPartyCookiesEnabled
-              onError={({ nativeEvent }) => {
-                setError(`Failed to load: ${nativeEvent.description || 'Unknown error'}`);
-              }}
-              onHttpError={({ nativeEvent }) => {
-                if (nativeEvent.statusCode >= 400) {
-                  setError(`HTTP Error: ${nativeEvent.statusCode}`);
-                }
-              }}
-              onShouldStartLoadWithRequest={(request) => {
-                console.log('Loading URL:', request.url);
-                return true;
-              }}
-            />
-
-            {loading && (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#0066cc" />
-                <Text style={styles.loadingText}>Loading Fina Money...</Text>
-              </View>
-            )}
-            {canGoBack && !loading && (
-              <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
-                <Text style={styles.backButtonText}>← Back</Text>
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+        <View style={styles.container}>
+          {error ? (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorTitle}>Connection Error</Text>
+              <Text style={styles.errorMessage}>{error}</Text>
+              <TouchableOpacity style={styles.retryButton} onPress={handleReload}>
+                <Text style={styles.retryButtonText}>Retry</Text>
               </TouchableOpacity>
-            )}
-          </>
-        )}
-      </View>
+            </View>
+          ) : (
+            <>
+              <WebView
+                ref={webViewRef}
+                source={{ uri: WEB_APP_URL }}
+                style={styles.webview}
+                onLoadStart={() => setLoading(true)}
+                onLoadEnd={() => setLoading(false)}
+                javaScriptEnabled
+                domStorageEnabled
+                allowFileAccess
+                mixedContentMode="compatibility"
+                thirdPartyCookiesEnabled
+                onError={({ nativeEvent }) => {
+                  setError(`Failed to load: ${nativeEvent.description || 'Unknown error'}`);
+                }}
+                onHttpError={({ nativeEvent }) => {
+                  if (nativeEvent.statusCode >= 400) {
+                    setError(`HTTP Error: ${nativeEvent.statusCode}`);
+                  }
+                }}
+                onShouldStartLoadWithRequest={(request) => {
+                  console.log('Loading URL:', request.url);
+                  if (
+                    request.url.includes('accounts.google.com') ||
+                    request.url.includes('auth.google')
+                  ) {
+                    handleGoogleSignIn();
+                    return false;
+                  }
+                  return true;
+                }}
+              />
+
+              {loading && (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="large" color="#0066cc" />
+                  <Text style={styles.loadingText}>Loading Fina Money...</Text>
+                </View>
+              )}
+            </>
+          )}
+        </View>
+      </SafeAreaView>
     </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+  },
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
@@ -107,11 +127,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   loadingContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -149,20 +165,6 @@ const styles = StyleSheet.create({
   retryButtonText: {
     color: '#ffffff',
     fontSize: 16,
-    fontWeight: '600',
-  },
-  backButton: {
-    position: 'absolute',
-    top: 50,
-    left: 16,
-    backgroundColor: 'rgba(0, 102, 204, 0.9)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  backButtonText: {
-    color: '#ffffff',
-    fontSize: 14,
     fontWeight: '600',
   },
 });
