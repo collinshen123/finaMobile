@@ -1,16 +1,54 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Fina Money Mobile App
 
-# Getting Started
+This is a mobile application for [Fina Money](https://www.fina.money/) built with [**React Native**](https://reactnative.dev), bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Prerequisites
 
-## Step 1: Start Metro
+Before you begin, ensure you have the following installed:
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- **Node.js** (v16 or higher)
+- **npm** or **yarn**
+- **React Native development environment** - Complete the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide
+  - **For iOS**: Xcode (Mac only) and CocoaPods
+  - **For Android**: Android Studio and Android SDK
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## Getting Started
 
-```sh
+### Step 1: Clone the Repository
+```bash
+git clone https://github.com/collinshen123/finaMobile.git
+cd finaMobile
+```
+
+### Step 2: Install Dependencies
+```bash
+# Using npm
+npm install
+
+# OR using Yarn
+yarn install
+```
+
+### Step 3: Install iOS Dependencies (Mac only)
+
+For iOS, you need to install CocoaPods dependencies. The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+```bash
+bundle install
+```
+
+Then, and every time you update your native dependencies, run:
+```bash
+cd ios
+bundle exec pod install
+cd ..
+```
+
+For more information, visit the [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+
+### Step 4: Start Metro
+
+Metro is the JavaScript build tool for React Native. Start the Metro dev server by running:
+```bash
 # Using npm
 npm start
 
@@ -18,13 +56,12 @@ npm start
 yarn start
 ```
 
-## Step 2: Build and run your app
+### Step 5: Build and Run Your App
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+With Metro running, open a new terminal window/pane from the root of your React Native project.
 
-### Android
-
-```sh
+#### For Android
+```bash
 # Using npm
 npm run android
 
@@ -32,25 +69,8 @@ npm run android
 yarn android
 ```
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
+#### For iOS
+```bash
 # Using npm
 npm run ios
 
@@ -58,40 +78,83 @@ npm run ios
 yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+If everything is set up correctly, you should see the app running in the Android Emulator, iOS Simulator, or your connected device.
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+> **Note**: You can also build the app directly from Android Studio or Xcode.
 
-## Step 3: Modify your app
+## Development
 
-Now that you have successfully run the app, let's make changes!
+### Making Changes
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+Open `App.tsx` in your text editor of choice and make changes. When you save, your app will automatically update via [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+### Force Reload
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+When you want to forcefully reload (e.g., to reset the app state):
 
-## Congratulations! :tada:
+- **Android**: Press <kbd>R</kbd> twice or select **"Reload"** from the **Dev Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> on Windows/Linux or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> on macOS)
+- **iOS**: Press <kbd>R</kbd> in iOS Simulator
 
-You've successfully run and modified your React Native App. :partying_face:
+## Building for Production
 
-### Now what?
+### Android APK
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+To create a release APK for sharing:
+```bash
+cd android
+./gradlew assembleRelease
+```
 
-# Troubleshooting
+The APK will be generated at:
+```
+android/app/build/outputs/apk/release/app-release.apk
+```
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+Users can install this APK directly on Android devices (requires enabling "Install from Unknown Sources").
 
-# Learn More
+### iOS
 
-To learn more about React Native, take a look at the following resources:
+For iOS distribution, you'll need an Apple Developer account ($99/year) to use TestFlight or the App Store.
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+## Troubleshooting
+
+If you encounter issues:
+
+- **Reset Metro cache**: `npm start -- --reset-cache`
+- **Clean Android build**: Delete `android/app/build/` folder and rebuild
+- **Clean iOS build**: Clean build folder in Xcode (<kbd>Cmd ⌘</kbd> + <kbd>Shift</kbd> + <kbd>K</kbd>)
+- **Reinstall dependencies**: Delete `node_modules/` and run `npm install` again
+- **iOS Pods issues**: Delete `ios/Pods/` and `ios/Podfile.lock`, then run `pod install` again
+
+For more help, see the official [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+
+## Project Structure
+```
+├── App.tsx                 # Main application component
+├── android/               # Android native code
+├── ios/                   # iOS native code
+├── node_modules/          # Dependencies
+├── package.json           # Project dependencies and scripts
+└── README.md             # This file
+```
+
+## Features
+
+- WebView-based app loading Fina Money web application
+- Google Sign-In integration for authentication
+- Cross-platform support (iOS and Android)
+- Error handling with retry functionality
+
+## Learn More
+
+To learn more about React Native, check out these resources:
+
+- [React Native Website](https://reactnative.dev) - Learn more about React Native
+- [Getting Started](https://reactnative.dev/docs/environment-setup) - Environment setup overview
+- [Learn the Basics](https://reactnative.dev/docs/getting-started) - Guided tour of React Native basics
+- [React Native Blog](https://reactnative.dev/blog) - Latest official blog posts
+- [React Native GitHub](https://github.com/facebook/react-native) - Open source repository
+
+## Contributing
+
+If you want to add this React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
