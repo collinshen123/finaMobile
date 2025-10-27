@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
 import {
-  ActivityIndicator,
   StatusBar,
   StyleSheet,
   Text,
@@ -15,7 +14,6 @@ const WEB_APP_URL = 'https://www.fina.money/';
 
 function App() {
   const webViewRef = useRef<WebView>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // 🔹 Configure Google Sign-In
@@ -49,7 +47,6 @@ function App() {
 
   const handleReload = () => {
     setError(null);
-    setLoading(true);
     webViewRef.current?.reload();
   };
 
@@ -67,46 +64,35 @@ function App() {
               </TouchableOpacity>
             </View>
           ) : (
-            <>
-              <WebView
-                ref={webViewRef}
-                source={{ uri: WEB_APP_URL }}
-                style={styles.webview}
-                onLoadStart={() => setLoading(true)}
-                onLoadEnd={() => setLoading(false)}
-                javaScriptEnabled
-                domStorageEnabled
-                allowFileAccess
-                mixedContentMode="compatibility"
-                thirdPartyCookiesEnabled
-                onError={({ nativeEvent }) => {
-                  setError(`Failed to load: ${nativeEvent.description || 'Unknown error'}`);
-                }}
-                onHttpError={({ nativeEvent }) => {
-                  if (nativeEvent.statusCode >= 400) {
-                    setError(`HTTP Error: ${nativeEvent.statusCode}`);
-                  }
-                }}
-                onShouldStartLoadWithRequest={(request) => {
-                  console.log('Loading URL:', request.url);
-                  if (
-                    request.url.includes('accounts.google.com') ||
-                    request.url.includes('auth.google')
-                  ) {
-                    handleGoogleSignIn();
-                    return false;
-                  }
-                  return true;
-                }}
-              />
-
-              {loading && (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="large" color="#0066cc" />
-                  <Text style={styles.loadingText}>Loading Fina Money...</Text>
-                </View>
-              )}
-            </>
+            <WebView
+              ref={webViewRef}
+              source={{ uri: WEB_APP_URL }}
+              style={styles.webview}
+              javaScriptEnabled
+              domStorageEnabled
+              allowFileAccess
+              mixedContentMode="compatibility"
+              thirdPartyCookiesEnabled
+              onError={({ nativeEvent }) => {
+                setError(`Failed to load: ${nativeEvent.description || 'Unknown error'}`);
+              }}
+              onHttpError={({ nativeEvent }) => {
+                if (nativeEvent.statusCode >= 400) {
+                  setError(`HTTP Error: ${nativeEvent.statusCode}`);
+                }
+              }}
+              onShouldStartLoadWithRequest={(request) => {
+                console.log('Loading URL:', request.url);
+                if (
+                  request.url.includes('accounts.google.com') ||
+                  request.url.includes('auth.google')
+                ) {
+                  handleGoogleSignIn();
+                  return false;
+                }
+                return true;
+              }}
+            />
           )}
         </View>
       </SafeAreaView>
@@ -125,17 +111,6 @@ const styles = StyleSheet.create({
   },
   webview: {
     flex: 1,
-  },
-  loadingContainer: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#666666',
   },
   errorContainer: {
     flex: 1,
